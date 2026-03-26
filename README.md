@@ -1,2 +1,3 @@
 # practice
-solving problems
+solving problems and learning things, documented.
+
