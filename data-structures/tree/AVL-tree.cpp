@@ -3,83 +3,87 @@ using namespace std;
 
 struct Node {
     int data;
-    Node *left, *right;
+    Node * left;
+    Node * right;
     int height;
-
-    Node(int val) : data(val), left(nullptr), right(nullptr), height(1) {}
+    Node (int key){
+        data = key;
+        left = nullptr;
+        right = nullptr;
+        height = 1;
+    }
 };
 
-int getHeight(Node* n) {
-    return n ? n->height : 0;
+int getHeight (Node * N){
+    if ( N == nullptr ) return 0;
+    return N->height;
 }
 
-int getBalance(Node* n) {
-    return n ? getHeight(n->left) - getHeight(n->right) : 0;
-}
-// Right Rotate (used for Left-Heavy situations)
-Node* rightRotate(Node* y) {
-    Node* x = y->left;
-    Node* T2 = x->right;
-
-    // Perform rotation
-    x->right = y;
-    y->left = T2;
-
-    // Update heights
-    y->height = max(getHeight(y->left), getHeight(y->right)) + 1;
-    x->height = max(getHeight(x->left), getHeight(x->right)) + 1;
-
-    return x; // New root
+int getBalance (Node * N){
+    if ( N == nullptr ) return 0;
+    return getHeight(N->left) - getHeight(N->right);
 }
 
-// Left Rotate (used for Right-Heavy situations)
-Node* leftRotate(Node* x) {
-    Node* y = x->right;
-    Node* T2 = y->left;
+Node * rightRotate(Node * n1){
+    Node * n1Left = n1->left;
+    Node * n2Right = n1Left->right;
+    // rotate
+    n1Left->right = n1;
+    n1->left = n2Right;
 
-    y->left = x;
-    x->right = T2;
+    n1->height = max( getHeight(n1->left), getHeight(n1->right)) + 1;
+    n1Left->height = max(getHeight(n1Left->right),getHeight(n1Left->left))+1;
 
-    x->height = max(getHeight(x->left), getHeight(x->right)) + 1;
-    y->height = max(getHeight(y->left), getHeight(y->right)) + 1;
-
-    return y; // New root
+    return n1Left;
 }
 
-Node* insert(Node* node, int val) {
-    // 1. Standard BST Insertion
-    if (!node) return new Node(val);
+Node * leftRotate (Node* n1){
+    Node *n1Right = n1->right;
+    Node *n2Left = n1Right->left;
 
-    if (val < node->data)
-        node->left = insert(node->left, val);
-    else if (val > node->data)
-        node->right = insert(node->right, val);
-    else
-        return node; // Duplicates not allowed
+    n1Right->left = n1;
+    n1->right = n2Left;
 
-    // 2. Update height of this ancestor node
-    node->height = 1 + max(getHeight(node->left), getHeight(node->right));
+    n1->height = max( getHeight(n1->left), getHeight(n1->right)) + 1;
+    n1Right->height = max(getHeight(n1Right->right),getHeight(n1Right->left))+1;
 
-    // 3. Get balance factor to check for unbalance
+    return n1Right;
+}
+
+Node *insert (Node * node, int key){
+    // find destination -> create node
+    if (node == nullptr) return new Node (key);
+
+    // navigate
+    if ( key < node->data ) node -> left = insert(node->left,key);
+    else if ( key > node->data ) node ->right = insert(node->right,key);
+    else return node;
+
+    // calculation
+    node -> height = max ( getHeight(node->left), getHeight(node->right));
     int balance = getBalance(node);
 
-    // Case 1: Left Left (LL)
-    if (balance > 1 && val < node->left->data)
-        return rightRotate(node);
+    // check balance
 
-    // Case 2: Right Right (RR)
-    if (balance < -1 && val > node->right->data)
-        return leftRotate(node);
-
-    // Case 3: Left Right (LR)
-    if (balance > 1 && val > node->left->data) {
-        node->left = leftRotate(node->left);
+    // left left
+    if ( balance > 1 && key < node -> data ){
         return rightRotate(node);
     }
 
-    // Case 4: Right Left (RL)
-    if (balance < -1 && val < node->right->data) {
-        node->right = rightRotate(node->right);
+    //right right
+     if ( balance < -1 && key > node -> data ){
+        return leftRotate(node);
+    }
+
+    // left right 
+    if ( balance > 1 && key > node -> data ){
+        node -> left = leftRotate(node->left);
+        return rightRotate(node);
+    }
+
+    // right left 
+    if ( balance < -1  && key < node -> data ){
+    node -> right = rightRotate(node->right);
         return leftRotate(node);
     }
 
@@ -87,6 +91,9 @@ Node* insert(Node* node, int val) {
 }
 
 int main() {
-    
+    Node * root = nullptr;
+    for (int i = 0; i < 10; ++ i){
+        insert(root,i);
+    }
     return 0;
 }
