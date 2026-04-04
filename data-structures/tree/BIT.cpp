@@ -13,7 +13,7 @@ void updateTree (int index, int val){
 
 int sumRange(int index){
     int sum  = 0;
-    while (index>=0){
+    while (index >= 0){
         sum += BIT[index];
         index -= (index & -index);
     }
