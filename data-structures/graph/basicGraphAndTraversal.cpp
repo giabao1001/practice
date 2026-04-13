@@ -26,14 +26,15 @@ int main() {
     string line;
     vector<bool> visited(size, false); 
     
+    
     // danh sách kề 
-    vector<vector<int>> List (size);
-    while ( getline(inFile,line) ){
-        stringstream ss (line);
-        int from, to;
-        ss >> from >> to;
-        List[from].push_back(to);
-    }   
+    // vector<vector<int>> List (size);
+    // while ( getline(inFile,line) ){
+    //     stringstream ss (line);
+    //     int from, to;
+    //     ss >> from >> to;
+    //     List[from].push_back(to);
+    // }   
 
     
 

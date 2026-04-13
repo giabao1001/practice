@@ -1,0 +1,16 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/trangiabao/nay no va gi do/practice/practice/data-structures/tree/segmentTree'
+relocations:
+  - { offset: 0x2491, size: 0x8, addend: 0x0, symName: __ZStL8__ioinit, symObjAddr: 0xF9FB, symBinAddr: 0x100008000, symSize: 0x0 }
+  - { offset: 0x24AF, size: 0x8, addend: 0x0, symName: __ZL4maxn, symObjAddr: 0x41C, symBinAddr: 0x100000C04, symSize: 0x0 }
+  - { offset: 0x24C5, size: 0x8, addend: 0x0, symName: _n, symObjAddr: 0xF9FC, symBinAddr: 0x100008004, symSize: 0x0 }
+  - { offset: 0x24E7, size: 0x8, addend: 0x0, symName: _arr, symObjAddr: 0xFA00, symBinAddr: 0x100008008, symSize: 0x0 }
+  - { offset: 0x250A, size: 0x8, addend: 0x0, symName: _t, symObjAddr: 0xFB90, symBinAddr: 0x100008198, symSize: 0x0 }
+  - { offset: 0x260F, size: 0x8, addend: 0x0, symName: __GLOBAL__sub_I_segmentTree.cpp, symObjAddr: 0x460, symBinAddr: 0x100000B98, symSize: 0x14 }
+  - { offset: 0x2626, size: 0x8, addend: 0x0, symName: __Z41__static_initialization_and_destruction_0v, symObjAddr: 0x424, symBinAddr: 0x100000B5C, symSize: 0x3C }
+  - { offset: 0x2644, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x330, symBinAddr: 0x100000A70, symSize: 0xEC }
+  - { offset: 0x2688, size: 0x8, addend: 0x0, symName: __Z5queryiiiii, symObjAddr: 0x1FC, symBinAddr: 0x10000093C, symSize: 0x134 }
+  - { offset: 0x271F, size: 0x8, addend: 0x0, symName: __Z6updateiiiii, symObjAddr: 0xEC, symBinAddr: 0x10000082C, symSize: 0x110 }
+  - { offset: 0x27AA, size: 0x8, addend: 0x0, symName: __Z5buildiii, symObjAddr: 0x0, symBinAddr: 0x100000740, symSize: 0xEC }
+...
