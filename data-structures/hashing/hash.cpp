@@ -1,86 +1,119 @@
 #include <iostream>
-#include <vector> 
+#include <vector>
+
 using namespace std;
 
-enum State {Emp, Occ, Rem};
+// Sử dụng enum class để tránh xung đột tên và tường minh hơn
+enum class State { Empty, Occupied, Removed };
 
-struct Hashing{
+struct Node {
     int key;
-    State state;
-    Hashing(){
-        state = Emp;
-    }
+    State state = State::Empty;
 };
 
-struct OpenHash{
+class OpenHashTable {
+private:
     int tableSize;
-    int probingType;
-    vector<Hashing> table;
+    int probingType; // 1: Linear, 2: Quadratic, 3: Double Hashing
+    vector<Node> table;
+
+    // Các hàm băm phụ (Helper functions)
+    int h1(int key) const {
+        return key % tableSize;
+    }
+
+    int h2(int key) const {
+        return 1 + (key % 5);
+    }
+
+    int getProbeIndex(int key, int step) const {
+        int baseHash = h1(key);
+        switch (probingType) {
+            case 1: // Linear Probing
+                return (baseHash + step) % tableSize;
+            case 2: // Quadratic Probing
+                return (baseHash + step * step) % tableSize;
+            case 3: // Double Hashing
+                return (baseHash + step * h2(key)) % tableSize;
+            default:
+                return (baseHash + step) % tableSize;
+        }
+    }
+
+public:
+    OpenHashTable(int size, int type) : tableSize(size), probingType(type) {
+        table.resize(tableSize);
+    }
+
+    void insert(int key) {
+        for (int step = 0; step < tableSize; ++step) {
+            int index = getProbeIndex(key, step);
+            // Có thể chèn vào ô trống hoặc ô đã bị đánh dấu xóa (Removed)
+            if (table[index].state != State::Occupied) {
+                table[index].key = key;
+                table[index].state = State::Occupied;
+                return;
+            }
+        }
+        cout << "Table Overflow: Could not insert " << key << endl;
+    }
+
+    bool search(int key) const {
+        for (int step = 0; step < tableSize; ++step) {
+            int index = getProbeIndex(key, step);
+            if (table[index].state == State::Empty) return false;
+            if (table[index].state == State::Occupied && table[index].key == key) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void remove(int key) {
+        for (int step = 0; step < tableSize; ++step) {
+            int index = getProbeIndex(key, step);
+            if (table[index].state == State::Empty) return;
+            if (table[index].state == State::Occupied && table[index].key == key) {
+                table[index].state = State::Removed;
+                return;
+            }
+        }
+    }
+
+    void display() const {
+        for (int i = 0; i < tableSize; ++i) {
+            cout << "[" << i << "]: ";
+            if (table[i].state == State::Occupied) cout << table[i].key;
+            else if (table[i].state == State::Removed) cout << "X (Removed)";
+            else cout << "- (Empty)";
+            cout << endl;
+        }
+    }
 };
-
-int getAd(int key, int m){
-    return key % m;
-}
-
-int jumpSize(int key){
-    return 1 + key % 5;
-}
-
-int getProbeIndex(OpenHash &hash, int key, int step){
-    int h1 = getAd(key, hash.tableSize);
-    if (hash.probingType == 1 ){
-        return (h1 + step) % hash.tableSize;
-    }
-    else if (hash.probingType == 2 ){
-        return (h1 + step*step ) % hash.tableSize;
-    }
-    else {
-        int h2 = jumpSize(key);
-        return ( h1 + step*h2 ) % hash.tableSize;
-    }
-}
-
-void insert(OpenHash &hash,int key){
-    for (int step = 0; step < hash.tableSize; ++ step ){
-        int index = getProbeIndex(hash,key,step);
-        if (hash.table[index].state != Occ){
-            hash.table[index].key = key;
-            hash.table[index].state = Occ;
-            return;
-        }
-    }
-}
-
-bool search (OpenHash &hash,int key){
-    for (int step = 0; step < hash.tableSize; ++step){
-        int index = getProbeIndex(hash,key,step);
-        if (hash.table[index].state == Emp ) return false;
-        if (hash.table[index].state == Occ && hash.table[index].key == key) return true;
-    }
-    return false;
-}
-
-void remove(OpenHash &hash, int key){
-    for (int step = 0; step < hash.tableSize; ++step){
-        int index = getProbeIndex(hash,key,step);
-        if (hash.table[index].state == Emp) return;
-        if (hash.table[index].state == Occ && hash.table[index].key == key ) {
-            hash.table[index].state = Rem;
-            return;
-        }
-    }
-}
 
 int main() {
-    ios_base::sync_with_stdio(false); cin.tie(NULL);
-    OpenHash myHash;
-    int n ;
-    cin >> n;
-    myHash.tableSize = 13;
-    int type;
-    cout << "probing type: ";
-    cin >> type;
-    myHash.table.resize(myHash.tableSize);
+    // Tối ưu nhập xuất
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    int size = 13;
+    int type = 1; // 1: Linear Probing
+
+    OpenHashTable myHash(size, type);
+
     int keys[] = {10, 22, 31, 4, 15, 28, 17, 88, 59};
+    for (int k : keys) {
+        myHash.insert(k);
+    }
+
+    cout << "Hash Table content:\n";
+    myHash.display();
+
+    int searchKey = 15;
+    cout << "\nSearch " << searchKey << ": " << (myHash.search(searchKey) ? "Found" : "Not Found") << endl;
+
+    myHash.remove(15);
+    cout << "After removing 15, search 15: " << (myHash.search(15) ? "Found" : "Not Found") << endl;
+
     return 0;
 }

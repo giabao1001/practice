@@ -1,68 +1,64 @@
 #include <iostream>
 #include <vector>
+#include <numeric> // Cho std::gcd (C++17)
+
 using namespace std;
 
-
-int getGcd(int a, int b){
-    while (a!=0){
-        int temp = b;
-        b = a % b;
-        a = temp;
+// Dùng std::gcd nếu dùng C++17, nếu không dùng hàm này:
+int computeGcd(int a, int b) {
+    while (b) {
+        a %= b;
+        swap(a, b);
     }
     return a;
 }
 
-struct Node{
+struct Node {
+    int gcdValue;
     int count;
-    int Gcd;
 };
 
-const int maxN = 100005;
-int arr[maxN];
-Node tree[maxN*4];
-int n ;
+class SegmentTree {
+private:
+    int n;
+    vector<Node> tree;
+    vector<int> data;
 
-Node mergeNode(Node L, Node R){
-    Node res;
-    res.Gcd = getGcd(L.Gcd,R.Gcd);
-    res.count = 0;
-    if (L.Gcd == res.Gcd) res.count += L.count;
-    if (R.Gcd == res.Gcd) res.count += R.count;
-    return res;
-}
+    Node merge(Node L, Node R) {
+        if (L.gcdValue == 0) return R;
+        if (R.gcdValue == 0) return L;
 
-void build ( int pos, int left, int right){
-    if ( left == right ){
-        tree[pos].Gcd = arr[left];
-        tree[pos].count = 1;
-        return;
+        int resGcd = computeGcd(L.gcdValue, R.gcdValue);
+        int resCount = 0;
+        if (L.gcdValue == resGcd) resCount += L.count;
+        if (R.gcdValue == resGcd) resCount += R.count;
+        
+        return {resGcd, resCount};
     }
-    int mid = (left + right)/2;
-    build (pos*2, left, mid);
-    build (pos*2 +1, mid + 1, right);
-    tree[pos] = mergeNode(tree[pos*2],tree[pos*2+1]);
-}
 
-Node query(int pos, int tleft, int tright,int left, int right ){
-    if ( right < tleft || left > tright){
-        return {0,0};
+    void build(int pos, int l, int r) {
+        if (l == r) {
+            tree[pos] = {data[l], 1};
+            return;
+        }
+        int mid = (l + r) / 2;
+        build(2 * pos, l, mid);
+        build(2 * pos + 1, mid + 1, r);
+        tree[pos] = merge(tree[2 * pos], tree[2 * pos + 1]);
     }
-    if ( tleft >= left && tright <= right ){
-        return tree[pos];
+
+    Node query(int pos, int tl, int tr, int l, int r) {
+        if (l > r) return {0, 0};
+        if (l == tl && r == tr) return tree[pos];
+        
+        int mid = (tl + tr) / 2;
+        return merge(query(2 * pos, tl, mid, l, min(r, mid)),
+                     query(2 * pos + 1, mid + 1, tr, max(l, mid + 1), r));
     }
-    else {
-        int mid = (tleft + tright)/2;
-        Node p1 = query(pos*2,tleft,mid,left,right);
-        Node p2 =query(pos*2+1,mid+1,right,left,right);
 
-        if (p1.Gcd == 0) return p2;
-        if (p2.Gcd == 0) return p1;
-
-        return mergeNode(p1,p2);
+public:
+    SegmentTree(const vector<int>& input) : data(input) {
+        n = data.size() - 1;
+        tree.assign(4 * n + 1, {0, 0});
+        build(1, 1, n);
     }
-}
-
-int main(){
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-}

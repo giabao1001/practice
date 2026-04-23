@@ -1,144 +1,105 @@
 #include <iostream>
 #include <vector>
 #include <queue>
-#include <stack>
+#include <algorithm>
+
 using namespace std;
 
-const int inf = 1e9;
+const int INF = 1e9;
 
+struct Edge {
+    int to;
+    int weight;
+};
 
-struct Graph{
+struct Graph {
     int V;
-    vector<vector<int>> adj;
+    vector<vector<Edge>> adj;
 
-    void init(int vertices){
+    void init(int vertices) {
         V = vertices;
-        adj.resize(vertices);
+        adj.assign(V + 1, vector<Edge>());
     }
 
-    void addEdge(int u, int v,int w){
-        adj[u].push_back(v);
+    void addEdge(int u, int v, int w = 1) {
+        adj[u].push_back({v, w});
     }
 };
 
-void dfs_recursive(Graph& graph, int u, vector<bool> &visited){
-    visited[u] = true;
-    cout << u << " ";
-    for ( int i : graph.adj[u]){
-        if (!visited[i]){
-            dfs_recursive(graph,i,visited);
-        }
-    }
-}
-
-void dfs(Graph& graph, int start){
-    vector<bool> visited (graph.V + 1,0);
-    cout << "Traversal: ";
-    dfs_recursive(graph,start,visited);
-    cout << "\n";
-}
-
-void bfs(Graph &graph, int start, int end){
-    int inf = 1e9;
-    vector<bool> visited(graph.V+1,0);
-    vector<int> parent(graph.V+1,0);
+// BFS tìm đường đi ngắn nhất trên đồ thị không trọng số
+void bfsPath(Graph &graph, int start, int end) {
+    vector<int> parent(graph.V + 1, -1);
+    vector<bool> visited(graph.V + 1, false);
     queue<int> q;
+
     visited[start] = true;
     q.push(start);
 
-    while (!q.empty()){
-        int top = q.front();
+    while (!q.empty()) {
+        int u = q.front();
         q.pop();
-        
-        if (top == end){
-            break;
-        }
-
-        for (int i : graph.adj[top]){
-            if (visited[i] == 0){
-                visited[i] = 1;
-                q.push(i);
-                parent[i] = top;
-            }
-        }   
-    }
-    vector<int> path;
-    int curr = end;
-    while (curr != start){
-        path.push_back(curr);
-        curr = parent[curr];
-    }
-    path.push_back(start);
-    for (int i = path.size()-1; i > 0; --i){
-        cout << path[i] << " ";
-    }
-    cout << "\n";
-}
-
-// int dijsktra(Graph &graph,int start, int end){
-//     vector <int> dist(graph.V+1,inf);
-//     vector <bool> visited (graph.V,false);
-//     vector <bool> parent(graph.V + 1,-1);
-
-//     dist[start] = 0;
-
-//     for (int i = 1; i <= graph.V; ++i){
-//         int u = -1;
-
-//         for (int j = 1; j<= graph.V; ++j){
-//             if (!visited[u] && (u == -1 || dist[j] < dist[u])){
-//                 u = j;
-//             }
-//         }
-
-//         if ( u == -1 || dist[u] == inf) break;
-//         visited[u] = true;
-
-//         if (u == end) break;
-
-//         for (int v = 1; v <= graph.V; ++v){
-//             if (graph.adj[u][v]!= 0 && graph.adj[u][v]!= inf){
-//                 if ( dist[v] > dist[u] + graph.adj[u][v] ){
-//                     dist[v] = dist[u] + graph.adj[u][v];
-//                     parent[v] = u;
-//                 }
-//             }
-//         }
-//     }
-//     return dist[end];
-// }
-
-
-int dijsktra(Graph &graph, int start, int end){
-    vector<int>dist(graph.V+1,inf);
-    vector<int>parent(graph.V+1,-1);
-    vector<bool>visited(graph.V+1,false);
-    dist[start] = 0;
-    for (int i = 1; i <= graph.V; ++i ){
-        int u = -1;
-
-        for (int j = 1; j <= graph.V; ++j){
-            if ( !visited[j] && ( u == -1 || dist[j] < dist[u] ) ){
-                u = j;
-            }
-        }
-
-        if (u == -1) break;
-        visited[u] = 1;
 
         if (u == end) break;
 
-        for (int v = 1; v <= graph.V; ++v){
-            if(graph.adj[u][v] != 0 && graph.adj[u][v]!= inf){
-                if ()
+        for (auto &edge : graph.adj[u]) {
+            if (!visited[edge.to]) {
+                visited[edge.to] = true;
+                parent[edge.to] = u;
+                q.push(edge.to);
             }
         }
+    }
 
+    if (parent[end] == -1 && start != end) {
+        cout << "No path found\n";
+        return;
+    }
+
+    vector<int> path;
+    for (int v = end; v != -1; v = parent[v]) path.push_back(v);
+    reverse(path.begin(), path.end());
+
+    cout << "BFS Path: ";
+    for (int node : path) cout << node << " ";
+    cout << "\n";
+}
+
+// Dijkstra dùng Priority Queue (O(E log V))
+void dijkstra(Graph &graph, int start) {
+    vector<int> dist(graph.V + 1, INF);
+    dist[start] = 0;
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    pq.push({0, start});
+
+    while (!pq.empty()) {
+        int d = pq.top().first;
+        int u = pq.top().second;
+        pq.pop();
+
+        if (d > dist[u]) continue;
+
+        for (auto &edge : graph.adj[u]) {
+            if (dist[u] + edge.weight < dist[edge.to]) {
+                dist[edge.to] = dist[u] + edge.weight;
+                pq.push({dist[edge.to], edge.to});
+            }
+        }
+    }
+
+    cout << "Dijkstra Distances:\n";
+    for (int i = 1; i <= graph.V; ++i) {
+        cout << "Node " << i << ": " << (dist[i] == INF ? -1 : dist[i]) << "\n";
     }
 }
 
 int main() {
-ios_base::sync_with_stdio(false); cin.tie(NULL);
+    ios_base::sync_with_stdio(false); cin.tie(NULL);
+    // Ví dụ sử dụng
+    Graph g; g.init(5);
+    g.addEdge(1, 2, 4); g.addEdge(1, 3, 1);
+    g.addEdge(3, 2, 2); g.addEdge(2, 4, 5);
     
+    bfsPath(g, 1, 4);
+    dijkstra(g, 1);
     return 0;
 }
