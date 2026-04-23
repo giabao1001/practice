@@ -6,10 +6,7 @@
 using namespace std;
 
 
-void DFS( int u, vector<bool> &visited ) {
-    visited [u] = true;
-    cout << u << " " << "\n";
-
+void DFS( ) {
 }
 
 int main() {
